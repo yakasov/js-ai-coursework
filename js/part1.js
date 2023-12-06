@@ -1,0 +1,1 @@
+function part1Main() {}
