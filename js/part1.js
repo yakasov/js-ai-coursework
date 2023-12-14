@@ -7,7 +7,7 @@
 
 class Part1 {
   constructor() {
-    this.goal = [
+    this.GOAL = [
       "11",
       "11",
       "11",
@@ -25,7 +25,7 @@ class Part1 {
       "11",
       "11",
     ];
-    this.goalSum = 64;
+    this.GOAL_SUM = 64;
 
     this.generations = [];
 
@@ -35,12 +35,14 @@ class Part1 {
     this.MUTATION_COUNT = 1; // must be at least 1
   }
 
-  async main(outputToHTML = false) {
+  main = async (outputToHTML = false) => {
     let current_generation = 0;
     this.generations.push(
       this.generate_population(this.POPULATION_SIZE, this.CHROMOSOME_LENGTH)
     );
     // Generate an initial population that is completely random
+    this.generations[current_generation].sort(this.sortChromosomes);
+    const initial_sum = this.innerSum(this.generations[0][0]);
 
     while (current_generation < this.MAX_GENERATIONS) {
       this.generations[current_generation].sort(this.sortChromosomes);
@@ -82,22 +84,22 @@ class Part1 {
       }
     }
 
-    const output = `Best match: ${this.innerSum(
+    const output = `Initial match: ${initial_sum}<br>Best match: ${this.innerSum(
       this.generations.at(-1)[0]
-    )} =<br>${this.generations.at(-1)[0].toString().replaceAll(",", "<br>")}`;
+    )}<br>${this.generations.at(-1)[0].toString().replaceAll(",", "<br>")}`;
     if (outputToHTML) {
       let el = document.getElementById("outputEl");
       el.innerHTML = output;
     }
     console.log(output.replaceAll("<br>", ", "));
-  }
+  };
 
-  innerSum(c) {
+  innerSum = (c) => {
     return c.reduce((a, b) => a + parseInt(b[0]) + parseInt(b[1]), 0);
     // JS sorting nonsense
     // takes each inner array (eg ["11", "01", "01", ...])
     // and sums the numbers using parseInt to make 2 + 1 + 1 ...
-  }
+  };
 
   sortChromosomes = (ca, cb) => {
     return this.innerSum(cb) - this.innerSum(ca);
@@ -106,7 +108,7 @@ class Part1 {
     // Uses innerSum to get the chromosome gene sum
   };
 
-  generate_population(p, c) {
+  generate_population = (p, c) => {
     let temp_pop = [];
     for (let _ = 0; _ < p; _++) {
       let new_p = [];
@@ -124,9 +126,9 @@ class Part1 {
     }
 
     return temp_pop;
-  }
+  };
 
-  crossover(cs1, cs2) {
+  crossover = (cs1, cs2) => {
     let return_array = [];
     for (let _ = 0; _ < 4; _++) {
       const r = Math.round(Math.random * (this.CHROMOSOME_LENGTH - 1));
@@ -141,7 +143,7 @@ class Part1 {
     }
 
     return return_array;
-  }
+  };
 
   mutate = (cs) => {
     let previous_mutations = [];
