@@ -40,22 +40,45 @@ class Part2 {
       this.WEIGHTS.push(temp_array);
     }
 
+    this.INPUT_SIZE = 2;
+    this.OUTPUT_SIZE = 1;
+
     this.LEARNING_RATE = 0.1;
-    this.EPOCHS = 10;
+    this.EPOCHS = 1000;
   }
 
   main = async (outputToHTML = false) => {
     for (let _ = 0; _ < this.EPOCHS; _++) {
-      console.log(_);
+      for (const data of this.TRAINING_DATA) {
+        const [label, ...inputs] = data;
+        const target = label == "dog" ? 1 : -1;
+
+        const output = this.predict(inputs);
+
+        const error = target - output;
+        for (let i = 0; i < inputs.length; i++) {
+          this.WEIGHTS[i] += this.LEARNING_RATE * error * inputs[i];
+        }
+      }
     }
 
+    let output_text = `Prediction for test inputs ${[0.9, -0.7]}: ${
+      this.predict([0.9, -0.7]) == 1 ? "A dog" : "Not a dog"
+    }`;
     let el = document.getElementById("outputEl");
-    el.innerHTML = this.WEIGHTS;
+    el.innerHTML = output_text;
   };
 
-  fit = () => {};
+  predict = (x) => {
+    let sum = 0;
+    for (let i = 0; i < x.length; i++) {
+      sum += x[i] * this.WEIGHTS[i];
+    }
+
+    return this.step(sum);
+  };
 
   step = (x) => {
-    return x > 0 ? 1 : 0;
+    return x > 0 ? 1 : -1;
   };
 }
