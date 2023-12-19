@@ -22,10 +22,10 @@
   <body id="body">
     <div class="table">
       <div class="column" id="part1col">
-        <button onclick="p1.main(true)">Part 1</button>
+        <button onclick="p1()">Part 1</button>
       </div>
       <div class="column" id="part2col">
-        <button onclick="p2.main(true)">Part 2</button>
+        <button onclick="p2()">Part 2</button>
       </div>
       <div class="column" id="part3col">
         <button onclick="part3Main()">Part 3</button>
@@ -37,7 +37,10 @@
         <button onclick="part5Main()">Part 5</button>
       </div>
     </div>
-    <p class="center" id="outputEl">Output</p>
+    <p class="center" id="outputEl">
+      Click each button to run.<br />Pressing the same button again will
+      reinitialize that part and yield a different result.
+    </p>
   </body>
 
   <script src="./js/part1.js"></script>
@@ -46,8 +49,16 @@
   <script src="./js/part4.js"></script>
   <script src="./js/part5.js"></script>
   <script>
-    const p1 = new Part1();
-    const p2 = new Part2();
+    function p1() {
+      const p = new Part1();
+      p.main(true);
+    }
+
+    function p2() {
+      const p = new Part2();
+      p.main(true);
+    }
+
     //const p3 = new Part3();
     //const p4 = new Part4();
     //const p5 = new Part5();

@@ -80,7 +80,9 @@ class Part1 {
         el.innerHTML = `Current generation: ${current_generation}<br>Best match: ${this.innerSum(
           this.generations[current_generation][0]
         )}`;
-        await new Promise((r) => setTimeout(r, 1));
+        if (current_generation % 10 == 0) {
+          await new Promise((r) => setTimeout(r, 1));
+        }
       }
     }
 
