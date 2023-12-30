@@ -28,13 +28,13 @@
         <button onclick="p2()">Part 2</button>
       </div>
       <div class="column" id="part3col">
-        <button onclick="part3Main()">Part 3</button>
+        <button onclick="p3()">Part 3</button>
       </div>
       <div class="column" id="part4col">
-        <button onclick="part4Main()">Part 4</button>
+        <button onclick="p4()">Part 4</button>
       </div>
       <div class="column" id="part5col">
-        <button onclick="part5Main()">Part 5</button>
+        <button onclick="p5()">Part 5</button>
       </div>
     </div>
     <p class="center" id="outputEl">
@@ -43,6 +43,7 @@
     </p>
   </body>
 
+  <script src="./js/math.js"></script>
   <script src="./js/part1.js"></script>
   <script src="./js/part2.js"></script>
   <script src="./js/part3.js"></script>
@@ -56,6 +57,11 @@
 
     function p2() {
       const p = new Part2();
+      p.main(true);
+    }
+
+    function p3() {
+      const p = new Part3();
       p.main(true);
     }
 

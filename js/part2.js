@@ -1,5 +1,6 @@
 class Part2 {
   constructor() {
+    // OR training data has two distinct data sets
     this.TRAINING_DATA_OR = [
       ["dog", 1, -1],
       ["dog", 0.9, -0.4],
@@ -20,6 +21,7 @@ class Part2 {
       ["elephant", -1, 0.9],
     ];
 
+    // XOR training data has two similar data sets
     this.TRAINING_DATA_XOR = [
       ["dog", 1, -1],
       ["dog", 0.9, -0.4],
@@ -40,6 +42,7 @@ class Part2 {
       ["cat", 0.3, -0.7],
     ];
 
+    // Combine the OR training data with random data for after training
     this.testsOR = this.TRAINING_DATA_OR.slice(0, 4).concat(
       // Half dog array, half elephant like elements
       Array.from({ length: 4 }, () => [
@@ -67,8 +70,6 @@ class Part2 {
     this.STARTING_WEIGHTS = new Array(this.INPUT_SIZE)
       .fill(0)
       .map(() => this.round(Math.random() * 0.5));
-
-    this.output_text;
   }
 
   main = async (outputToHTML = false) => {
@@ -122,12 +123,17 @@ class Part2 {
         const [label, ...inputs] = data;
         const target = label == "dog" ? 1 : -1;
 
+        // Our output is the result of our prediction
+        // If our prediction is above 0, then it is positive (1), otherwise it is negative (-1)
         const output = this.step(this.predict(inputs, weights) + bias);
 
+        // Our error is the difference between our prediction and the target
         const error = target - output;
         for (let i = 0; i < inputs.length; i++) {
+          // Update each weight
           weights[i] += this.LEARNING_RATE * error * inputs[i];
         }
+        // Update bias
         bias += this.LEARNING_RATE * error;
       }
     }
