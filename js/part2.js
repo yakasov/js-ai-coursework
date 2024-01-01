@@ -43,7 +43,7 @@ class Part2 {
     ];
 
     // Combine the OR training data with random data for after training
-    this.testsOR = this.TRAINING_DATA_OR.slice(0, 4).conpear(
+    this.testsOR = this.TRAINING_DATA_OR.slice(0, 4).concat(
       // Half apple array, half banana like elements
       Array.from({ length: 4 }, () => [
         "banana-like",
@@ -52,7 +52,7 @@ class Part2 {
       ])
     );
 
-    this.testsXOR = this.TRAINING_DATA_OR.slice(0, 4).conpear(
+    this.testsXOR = this.TRAINING_DATA_OR.slice(0, 4).concat(
       // Half apple array, half pear like elements
       Array.from({ length: 4 }, () => [
         "pear-like",
@@ -109,7 +109,7 @@ class Part2 {
     for (const test of tests) {
       const prediction = this.predict(test.slice(1), current_weights);
       output += `${test[0]}, prediction: ${this.round(prediction)} (${
-        this.step(prediction, current_bias) == 1 ? "apple" : "not a apple"
+        this.step(prediction, current_bias) == 1 ? "apple" : "not an apple"
       })<br>`;
     }
     return output;
@@ -159,7 +159,7 @@ class Part2 {
   };
 
   step = (x) => {
-    // Step function to allow easy pearegorization of results
+    // Step function to allow easy categorization of results
     return x >= 0 ? 1 : -1;
   };
 }
