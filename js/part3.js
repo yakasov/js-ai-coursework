@@ -120,18 +120,13 @@ class Part3 {
     }
   };
 
-  sigmoid = (x) => {
-    // Normal sigmoid function
-    // with some JS nonsense to convert it to an array so it behaves properly
-    // in the case it isn't (for example, like on the output layer)
-    return (Array.isArray(x) ? x : [x]).map((e) => 1 / (1 + Math.exp(-e)));
-  };
+  // Normal sigmoid function
+  // with some JS nonsense to convert it to an array so it behaves properly
+  // in the case it isn't (for example, like on the output layer)
+  sigmoid = (x) =>
+    (Array.isArray(x) ? x : [x]).map((e) => 1 / (1 + Math.exp(-e)));
 
-  sigmoid_d = (x) => {
-    return x * (1 - x);
-  };
+  sigmoid_d = (x) => x * (1 - x);
 
-  round = (x) => {
-    return Math.round(x * 100) / 100;
-  };
+  round = (x) => Math.round(x * 100) / 100;
 }

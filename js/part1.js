@@ -96,29 +96,13 @@ class Part1 {
     console.log(output.replaceAll("<br>", ", "));
   };
 
-  innerSum = (c) => {
-    return c.reduce((a, b) => a + parseInt(b[0]) + parseInt(b[1]), 0);
-    // JS sorting nonsense
-    // takes each inner array (eg ["11", "01", "01", ...])
-    // and sums the numbers using parseInt to make 2 + 1 + 1 ...
-  };
-
-  sortChromosomes = (ca, cb) => {
-    return this.innerSum(cb) - this.innerSum(ca);
-    // A bit more JS sorting nonsense
-    // Sorts from greatest sum first using arrayB - arrayA
-    // Uses innerSum to get the chromosome gene sum
-  };
-
   generate_population = (p, c) => {
     let temp_pop = [];
     for (let _ = 0; _ < p; _++) {
       let new_p = [];
 
       for (let _ = 0; _ < c; _++) {
-        const new_c = `${Math.round(Math.random())}${Math.round(
-          Math.random()
-        )}`;
+        const new_c = `${this.cryptoRandom()}${this.cryptoRandom()}`;
         new_p.push(new_c);
         // Create a random gene of 0 or 1
         // Create enough to fill a whole chromosome
@@ -161,10 +145,27 @@ class Part1 {
       // We keep track of the previous mutations
       // to avoid mutating the same gene twice
 
-      cs[r] = `${Math.round(Math.random())}${Math.round(Math.random())}`;
+      cs[r] = `${this.cryptoRandom()}${this.cryptoRandom()}`;
       // Set the gene to something random
     }
 
     return cs;
   };
+
+  innerSum = (c) => c.reduce((a, b) => a + parseInt(b[0]) + parseInt(b[1]), 0);
+  // JS sorting nonsense
+  // takes each inner array (eg ["11", "01", "01", ...])
+  // and sums the numbers using parseInt to make 2 + 1 + 1 ...
+
+  sortChromosomes = (ca, cb) => this.innerSum(cb) - this.innerSum(ca);
+  // A bit more JS sorting nonsense
+  // Sorts from greatest sum first using arrayB - arrayA
+  // Uses innerSum to get the chromosome gene sum
+
+  cryptoRandom = () => self.crypto.getRandomValues(new Uint8Array(1))[0] % 2;
+  // Originally I just used Math.round(Math.floor()),
+  // but I found the distribution was favouring 1 over 0.
+  // So I wrote this for cryptographically secure random numbers...
+  // but the distribution only improved slightly.
+  // Initial match is still ~ 40 instead of ~ 32.
 }

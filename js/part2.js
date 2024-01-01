@@ -144,9 +144,7 @@ class Part2 {
     return [weights, bias];
   };
 
-  round = (x) => {
-    return Math.round(x * 100) / 100;
-  };
+  round = (x) => Math.round(x * 100) / 100;
 
   predict = (data, weights) => {
     let sum = 0;
@@ -158,8 +156,6 @@ class Part2 {
     return sum;
   };
 
-  step = (x) => {
-    // Step function to allow easy categorization of results
-    return x >= 0 ? 1 : -1;
-  };
+  // Step function to allow easy categorization of results
+  step = (x) => (x >= 0 ? 1 : -1);
 }
