@@ -1,32 +1,12 @@
 // This code can be executed by copying it into a browser console
 // and running >
-// await main()
+// await (new Part1()).main()
 //
 // It can also be found at
 // https://yakasov.github.io/pages/projects/js-ai-coursework/
 
 class Part1 {
   constructor() {
-    this.GOAL = [
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-      "11",
-    ];
-    this.GOAL_SUM = 64;
-
     this.generations = [];
 
     this.MAX_GENERATIONS = 1000;

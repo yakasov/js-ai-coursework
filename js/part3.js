@@ -1,3 +1,10 @@
+// This code can be executed by copying it into a browser console
+// and running >
+// await (new Part3()).main()
+//
+// It can also be found at
+// https://yakasov.github.io/pages/projects/js-ai-coursework/
+
 class Part3 {
   constructor() {
     this.INPUT_SIZE = 3;
@@ -6,7 +13,7 @@ class Part3 {
 
     this.LEARNING_RATE = 0.1;
     this.EPOCHS = 1000; // Keep TRAIN_SIZE * EPOCHS = ~ 1e5
-    // See line 111 for the reasoning
+    // See line 118 for the reasoning
 
     this.INPUTS = new Array(this.TRAIN_SIZE)
       .fill(0)

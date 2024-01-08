@@ -1,3 +1,10 @@
+// This code can be executed by copying it into a browser console
+// and running >
+// await (new Part2()).main()
+//
+// It can also be found at
+// https://yakasov.github.io/pages/projects/js-ai-coursework/
+
 class Part2 {
   constructor() {
     // OR training data has two distinct data sets
