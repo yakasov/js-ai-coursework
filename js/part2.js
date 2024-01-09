@@ -1,9 +1,10 @@
-// This code can be executed by copying it into a browser console
-// and running >
-// await (new Part2()).main()
-//
-// It can also be found at
-// https://yakasov.github.io/js-ai-coursework/
+/*
+This code can be executed by copying it into a browser console
+and running >
+await (new Part2()).main()
+It can also be found at
+https://yakasov.github.io/js-ai-coursework/
+*/
 
 class Part2 {
   constructor() {

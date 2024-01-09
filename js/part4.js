@@ -1,9 +1,10 @@
-// This code can be executed by copying it into a browser console
-// and running >
-// await (new Part4()).main()
-//
-// It can also be found at
-// https://yakasov.github.io/js-ai-coursework/
+/*
+This code can be executed by copying it into a browser console
+and running >
+await (new Part4()).main()
+It can also be found at
+https://yakasov.github.io/js-ai-coursework/
+*/
 
 class Part4 {
   constructor() {
@@ -74,9 +75,11 @@ class Part4 {
     let output = inputs;
     this.OUTPUTS[0] = inputs;
 
-    // Generate a prediction for each layer
-    // This is done by multiplying our inputs by our weights,
-    // then applying the relu function
+    /*
+    Generate a prediction for each layer
+    This is done by multiplying our inputs by our weights,
+    then applying the relu function
+    */
     for (let i = 0; i < this.WEIGHTS.length; i++) {
       const output_next = this.fixedDot(output, this.WEIGHTS[i]);
       output = this.relu(output_next);
@@ -87,9 +90,11 @@ class Part4 {
   };
 
   backwards_pass = (error) => {
-    // Here, we generate the derivatives and update our error
-    // After generating our derivatives using relu_d,
-    // we can then update our weights using the gradient descent method
+    /*
+    Here, we generate the derivatives and update our error
+    After generating our derivatives using relu_d,
+    we can then update our weights using the gradient descent method
+    */
     for (let i = this.DERIVATIVES.length - 1; i > 0; i--) {
       const output_previous = this.OUTPUTS[i + 1];
 
@@ -122,18 +127,22 @@ class Part4 {
     }
   };
 
-  // Normal relu function
-  // with some JS nonsense to convert it to an array so it behaves properly
-  // in the case it isn't (for example, like on the output layer)
+  /*
+  Normal relu function
+  with some JS nonsense to convert it to an array so it behaves properly
+  in the case it isn't (for example, like on the output layer)
+  */
   relu = (x) => (Array.isArray(x) ? x : [x]).map((e) => Math.max(0, e));
 
   relu_d = (x) => (x >= 0 ? 1 : 0);
 
   round = (x) => Math.round(x * 100) / 100;
 
-  // math.js dot isn't as elegant as numpy.dot
-  // and has two functions that work similarly but have different requirements
-  // so this helps us switch between them for calculating
+  /*
+  math.js dot isn't as elegant as numpy.dot
+  and has two functions that work similarly but have different requirements
+  so this helps us switch between them for calculating
+  */
   fixedDot = (a, b) =>
     a.length == b.length ? math.dot(a, b) : math.dotMultiply(a, b);
 }

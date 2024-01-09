@@ -1,9 +1,10 @@
-// This code can be executed by copying it into a browser console
-// and running >
-// await (new Part1()).main()
-//
-// It can also be found at
-// https://yakasov.github.io/js-ai-coursework/
+/*
+This code can be executed by copying it into a browser console
+and running >
+await (new Part1()).main()
+It can also be found at
+https://yakasov.github.io/js-ai-coursework/
+*/
 
 class Part1 {
   constructor() {
@@ -29,10 +30,12 @@ class Part1 {
       if (this.innerSum(this.generations[current_generation][0]) == 64) {
         break;
       }
-      // Sort the current generation by greatest gene sum
-      // Our goal is a set of 32 "11" genes, which has a sum of 64
-      // So those chromosomes with the highest sum are best
-      // If we have a chromosome of sum 64, we have met our goal
+      /*
+      Sort the current generation by greatest gene sum
+      Our goal is a set of 32 "11" genes, which has a sum of 64
+      So those chromosomes with the highest sum are best
+      If we have a chromosome of sum 64, we have met our goal
+      */
 
       let new_population = [];
       for (let i = 0; i < this.POPULATION_SIZE / 2; i++) {
@@ -101,11 +104,13 @@ class Part1 {
       return_array.push(
         cs1.slice(0, r).concat(cs2.slice(r, this.CHROMOSOME_LENGTH))
       );
-      // Take a random amount of genes from chromosome 1
-      // and combine them with the proportional amount from chromosome 2
-      // thereby crossing over at a random point each time.
-      // This is done 4 times from 2 chromosomes to make a full
-      // 64 strong population (since we originally took the top half only)
+      /*
+      Take a random amount of genes from chromosome 1
+      and combine them with the proportional amount from chromosome 2
+      thereby crossing over at a random point each time.
+      This is done 4 times from 2 chromosomes to make a full
+      64 strong population (since we originally took the top half only)
+      */
     }
 
     return return_array;
@@ -133,19 +138,25 @@ class Part1 {
   };
 
   innerSum = (c) => c.reduce((a, b) => a + parseInt(b[0]) + parseInt(b[1]), 0);
-  // JS sorting nonsense
-  // takes each inner array (eg ["11", "01", "01", ...])
-  // and sums the numbers using parseInt to make 2 + 1 + 1 ...
+  /*
+  JS sorting nonsense
+  takes each inner array (eg ["11", "01", "01", ...])
+  and sums the numbers using parseInt to make 2 + 1 + 1 ...
+  */
 
   sortChromosomes = (ca, cb) => this.innerSum(cb) - this.innerSum(ca);
-  // A bit more JS sorting nonsense
-  // Sorts from greatest sum first using arrayB - arrayA
-  // Uses innerSum to get the chromosome gene sum
+  /*
+  A bit more JS sorting nonsense
+  Sorts from greatest sum first using arrayB - arrayA
+  Uses innerSum to get the chromosome gene sum
+  */
 
   cryptoRandom = () => self.crypto.getRandomValues(new Uint8Array(1))[0] % 2;
-  // Originally I just used Math.round(Math.floor()),
-  // but I found the distribution was favouring 1 over 0.
-  // So I wrote this for cryptographically secure random numbers...
-  // but the distribution only improved slightly.
-  // Initial match is still ~ 40 instead of ~ 32.
+  /*
+  Originally I just used Math.round(Math.floor()),
+  but I found the distribution was favouring 1 over 0.
+  So I wrote this for cryptographically secure random numbers...
+  but the distribution only improved slightly.
+  Initial match is still ~ 40 instead of ~ 32.
+  */
 }

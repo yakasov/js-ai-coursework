@@ -1,9 +1,10 @@
-// This code can be executed by copying it into a browser console
-// and running >
-// await (new Part3()).main()
-//
-// It can also be found at
-// https://yakasov.github.io/js-ai-coursework/
+/*
+This code can be executed by copying it into a browser console
+and running >
+await (new Part3()).main()
+It can also be found at
+https://yakasov.github.io/js-ai-coursework/
+*/
 
 class Part3 {
   constructor() {
@@ -77,9 +78,11 @@ class Part3 {
     let output = inputs;
     this.OUTPUTS[0] = inputs;
 
-    // Generate a prediction for each layer
-    // This is done by multiplying our inputs by our weights,
-    // then applying the sigmoid function
+    /*
+    Generate a prediction for each layer
+    This is done by multiplying our inputs by our weights,
+    then applying the sigmoid function
+    */
     for (let i = 0; i < this.WEIGHTS.length; i++) {
       const output_next = math.dot(output, this.WEIGHTS[i]);
       output = this.sigmoid(output_next);
@@ -90,9 +93,11 @@ class Part3 {
   };
 
   backwards_pass = (error) => {
-    // Here, we generate the derivatives and update our error
-    // After generating our derivatives using sigmoid_d,
-    // we can then update our weights using the gradient descent method
+    /*
+    Here, we generate the derivatives and update our error
+    After generating our derivatives using sigmoid_d,
+    we can then update our weights using the gradient descent method
+    */
     for (let i = this.DERIVATIVES.length - 1; i > 0; i--) {
       const output_previous = this.OUTPUTS[i + 1];
 
@@ -115,10 +120,12 @@ class Part3 {
     // Find a local minimum for sigmoid_d
     // Then we can adjust our weights
     for (let i = 0; i < this.WEIGHTS.length; i++) {
-      // This math.dotMultiply call is responsible for ~66% of the delay
-      // when pressing the run button!!
-      // Because of this, this.EPOCHS is set to 1000
-      // A variable learning rate could possibly improve convergence speeds?
+      /*
+      This math.dotMultiply call is responsible for ~66% of the delay
+      when pressing the run button!!
+      Because of this, this.EPOCHS is set to 1000
+      A variable learning rate could possibly improve convergence speeds?
+      */
       const weightUpdate = math.dotMultiply(
         this.DERIVATIVES[i],
         this.LEARNING_RATE
@@ -127,9 +134,11 @@ class Part3 {
     }
   };
 
-  // Normal sigmoid function
-  // with some JS nonsense to convert it to an array so it behaves properly
-  // in the case it isn't (for example, like on the output layer)
+  /*
+  Normal sigmoid function
+  with some JS nonsense to convert it to an array so it behaves properly
+  in the case it isn't (for example, like on the output layer)
+  */
   sigmoid = (x) =>
     (Array.isArray(x) ? x : [x]).map((e) => 1 / (1 + Math.exp(-e)));
 
