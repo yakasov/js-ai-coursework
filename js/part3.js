@@ -3,7 +3,7 @@
 // await (new Part3()).main()
 //
 // It can also be found at
-// https://yakasov.github.io/pages/projects/js-ai-coursework/
+// https://yakasov.github.io/js-ai-coursework/
 
 class Part3 {
   constructor() {

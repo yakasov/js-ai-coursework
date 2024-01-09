@@ -40,7 +40,7 @@
     <div class="center" id="outputDiv">
       <p id="outputEl">
         Click each button to run.<br />Pressing the same button again will
-        reinitialize that part and yield a different result.
+        reinitialize that part and yield a different result (except for Part 5).
       </p>
     </div>
   </body>
@@ -52,6 +52,9 @@
   <script src="./js/part4.js"></script>
   <script src="./js/part5.js"></script>
   <script>
+    const part5 = new Part5();
+    // dataset is a lot to load so we don't reinit it
+
     function p1() {
       const p = new Part1();
       p.main(true);
@@ -73,8 +76,7 @@
     }
 
     function p5() {
-      const p = new Part5();
-      p.main(true);
+      part5.main(true);
     }
   </script>
 </html>
