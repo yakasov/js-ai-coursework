@@ -10,7 +10,7 @@ class Part5 {
   constructor() {
     this.decoder = new TextDecoder("utf-8");
     this.encoder = new TextEncoder("utf-8");
-    this.imageCount = 5; // How many images (out of 10000) to load
+    this.imageCount = 100; // How many images (out of 10000) to load
     this.labels = [
       "airplane",
       "automobile",
@@ -27,26 +27,35 @@ class Part5 {
 
     this.DATASET = [];
     this.FILTERS = 2;
-    this.WEIGHTS = new Array(this.FILTERS).fill(0).map(() => {
-      return {
-        red: new Array(3)
-          .fill(0)
-          .map(() =>
-            new Array(3).fill(0).map(() => this.round(Math.random() * 0.5))
-          ),
-        green: new Array(3)
-          .fill(0)
-          .map(() =>
-            new Array(3).fill(0).map(() => this.round(Math.random() * 0.5))
-          ),
-        blue: new Array(3)
-          .fill(0)
-          .map(() =>
-            new Array(3).fill(0).map(() => this.round(Math.random() * 0.5))
-          ),
-      };
-    });
+    this.WEIGHTS = {
+      red: new Array(3)
+        .fill(0)
+        .map(() =>
+          new Array(3).fill(0).map(() => this.round(Math.random() * 0.5))
+        ),
+      green: new Array(3)
+        .fill(0)
+        .map(() =>
+          new Array(3).fill(0).map(() => this.round(Math.random() * 0.5))
+        ),
+      blue: new Array(3)
+        .fill(0)
+        .map(() =>
+          new Array(3).fill(0).map(() => this.round(Math.random() * 0.5))
+        ),
+    };
     this.BIASES = [0, 0, 0];
+
+    this.INPUT_SIZE = 3; // x64
+    this.OUTPUT_SIZE = 1;
+
+    this.LEARNING_RATE = 0.1;
+    this.EPOCHS = 1000;
+    this.DERIVATIVES = [
+      new Array(this.INPUT_SIZE).fill(0).map(() => new Array(64).fill(0)),
+      new Array(this.OUTPUT_SIZE).fill(0),
+    ];
+    this.OUTPUTS = new Array(this.imageCount + 1).fill(0);
   }
 
   main = async (outputToHtml = false) => {
@@ -94,29 +103,20 @@ class Part5 {
             outputs[this.colours[j]].length
               ? outputs[this.colours[j]]
               : img[this.colours[j]],
-            i,
             j
           );
-          console.log(outputs[this.colours[j]]);
         }
 
         this.DATASET[index]["processedChannels"] = outputs;
       }
 
-      // Flatten the 8x8 results into a 1D array
-      let finalVector = [];
-      Object.keys(this.DATASET[index]["processedChannels"]).forEach(
-        (k) =>
-          (finalVector = finalVector.concat(
-            this.DATASET[index]["processedChannels"][k].flat()
-          ))
-      );
-      this.DATASET[index]["finalVector"] = finalVector;
+      console.log(this.DATASET[index]);
+      this.train(this.DATASET[index]);
       console.log(`${index + 1}/${this.imageCount}`);
     }
   };
 
-  buildOutputMap = (dimArray, filterNo, colourNo) => {
+  buildOutputMap = (dimArray, colourNo) => {
     /*
     the input is 32 x 32
     we need to apply a filter over the top
@@ -128,7 +128,7 @@ class Part5 {
     ... grumble
     
     the weights matrix is
-    this.WEIGHTS[filterNo][this.colours[colourNo]] => [3 x [3]]
+    this.WEIGHTS[this.colours[colourNo]] => [3 x [3]]
     */
 
     let paddedArray = dimArray.map((row) => [~~0].concat(row).concat([~~0]));
@@ -153,7 +153,7 @@ class Part5 {
         // Multiply the weights against the filter we've applied
         const output = math.dotMultiply(
           filter,
-          this.WEIGHTS[filterNo][this.colours[colourNo]]
+          this.WEIGHTS[this.colours[colourNo]]
         );
 
         const outputSum = output
@@ -206,7 +206,7 @@ class Part5 {
     this.DATASET = this.DATASET.map((buffer) => {
       // 1 byte label, then 3072 R/G/B bytes
       let dict = {
-        label: this.decEnc(buffer.slice(0, 1)),
+        label: this.decEnc(buffer.slice(0, 1)) / 10, // so our target is between 0 and 1
         redRaw: buffer.slice(1, 1025),
         red: [],
         greenRaw: buffer.slice(1025, 2049),
@@ -228,6 +228,24 @@ class Part5 {
       }
       return dict;
     });
+  };
+
+  train = (currentImage) => {
+    for (let epoch = 0; epoch < this.EPOCHS; epoch++) {
+      const target = currentImage["label"];
+      for (const colour of Object.entries(currentImage["processedChannels"])) {
+        const inputs = colour[1];
+
+        // good god how do i do this ???
+        // for now just show a pretty picture
+
+        // our dict has a label (0 -> 0.9)
+        // our dict has 'processedChannels' which is what we're looping through
+        // colour[1] is an 8x8 matrix of that specific colour channel (RGB)
+        // ... hmmm
+      }
+    }
+    this.displayImg(currentImage);
   };
 
   decEnc = (buffer) => {
@@ -266,6 +284,8 @@ class Part5 {
   };
 
   relu = (x) => Math.max(0, x);
+
+  relu_d = (x) => (x >= 0 ? 1 : 0);
 
   round = (x) => Math.round(x * 100) / 100;
 }
