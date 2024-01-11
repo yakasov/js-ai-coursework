@@ -10,10 +10,10 @@ class Part5 {
   constructor() {
     this.decoder = new TextDecoder("utf-8");
     this.encoder = new TextEncoder("utf-8");
-    this.imageCount = 100; // How many images (out of 10000) to load
+    this.imageCount = 10000; // How many images (out of 10000) to load
     this.labels = [
       "airplane",
-      "automobile",
+      "car",
       "bird",
       "cat",
       "deer",
@@ -27,66 +27,71 @@ class Part5 {
 
     this.DATASET = [];
     this.FILTERS = 2;
-    this.WEIGHTS = {
-      red: new Array(3)
+    this.WEIGHTS = {};
+    for (let l = 0; l < this.labels.length; l++) {
+      this.WEIGHTS[l] = new Array(192)
         .fill(0)
-        .map(() =>
-          new Array(3).fill(0).map(() => this.round(Math.random() * 0.5))
-        ),
-      green: new Array(3)
-        .fill(0)
-        .map(() =>
-          new Array(3).fill(0).map(() => this.round(Math.random() * 0.5))
-        ),
-      blue: new Array(3)
-        .fill(0)
-        .map(() =>
-          new Array(3).fill(0).map(() => this.round(Math.random() * 0.5))
-        ),
-    };
-    this.BIASES = [0, 0, 0];
-
-    this.INPUT_SIZE = 3; // x64
-    this.OUTPUT_SIZE = 1;
+        .map(() => this.round(Math.random()));
+    }
+    this.BIASES = {};
+    for (let l = 0; l < this.labels.length; l++) {
+      this.BIASES[l] = this.round(Math.random());
+    }
 
     this.LEARNING_RATE = 0.1;
-    this.EPOCHS = 1000;
-    this.DERIVATIVES = [
-      new Array(this.INPUT_SIZE).fill(0).map(() => new Array(64).fill(0)),
-      new Array(this.OUTPUT_SIZE).fill(0),
-    ];
-    this.OUTPUTS = new Array(this.imageCount + 1).fill(0);
+    this.PREVIOUS = [];
   }
 
   main = async (outputToHtml = false) => {
     if (outputToHtml) {
       const el = document.getElementById("outputEl");
       el.innerHTML = `Building output maps...<br>Processing ${this.imageCount} images over ${this.FILTERS} filters<br><br>You can see progress in the console!`;
+      document.getElementById("outputDiv").innerHTML = "";
     }
 
     if (!this.DATASET.length) {
       await this.loadDataset();
     }
 
-    this.sampleImage();
+    this.sampleImages(outputToHtml);
+  };
 
-    if (outputToHtml) {
-      const el = document.getElementById("outputEl");
-      el.innerHTML = `DONE`;
+  finalPrediction = (img, outputToHtml) => {
+    let outputs = {
+      red: [],
+      green: [],
+      blue: [],
+    };
+
+    for (let i = 0; i < this.FILTERS; i++) {
+      for (let j = 0; j < 3; j++) {
+        outputs[this.colours[j]] = this.forwardPass(
+          outputs[this.colours[j]].length
+            ? outputs[this.colours[j]]
+            : img[this.colours[j]]
+        );
+      }
+
+      // Combine all three 8x8 colour matrices into one 192 length vector
+      img["processedChannels"] = outputs;
+      img["combinedVector"] = []
+        .concat(
+          ...img["processedChannels"]["red"],
+          ...img["processedChannels"]["green"],
+          img["processedChannels"]["blue"]
+        )
+        .flat();
     }
-    console.log(this.DATASET[0]);
 
-    if (outputToHtml && false) {
-      const displayDict =
-        this.DATASET[Math.round(Math.random() * this.imageCount)];
-      const el = document.getElementById("outputEl");
-      el.innerText = displayDict.label;
-
-      this.displayImg(displayDict);
+    const predictions = this.generatePredictions(img);
+    const prediction =
+      this.labels[predictions.indexOf(Math.max(...predictions))];
+    if (outputToHtml) {
+      this.displayImg(img, prediction);
     }
   };
 
-  sampleImage = () => {
+  sampleImages = (outputToHtml) => {
     for (const [index, img] of this.DATASET.entries()) {
       // Each image ...
       let outputs = {
@@ -99,24 +104,40 @@ class Part5 {
         // through each filter ...
         for (let j = 0; j < 3; j++) {
           // for each colour
-          outputs[this.colours[j]] = this.buildOutputMap(
+          outputs[this.colours[j]] = this.forwardPass(
             outputs[this.colours[j]].length
               ? outputs[this.colours[j]]
-              : img[this.colours[j]],
-            j
+              : img[this.colours[j]]
           );
         }
 
+        // Combine all three 8x8 colour matrices into one 192 length vector
         this.DATASET[index]["processedChannels"] = outputs;
+        this.DATASET[index]["combinedVector"] = []
+          .concat(
+            ...this.DATASET[index]["processedChannels"]["red"],
+            ...this.DATASET[index]["processedChannels"]["green"],
+            this.DATASET[index]["processedChannels"]["blue"]
+          )
+          .flat();
       }
 
-      console.log(this.DATASET[index]);
-      this.train(this.DATASET[index]);
-      console.log(`${index + 1}/${this.imageCount}`);
+      this.train(img);
+
+      if (index % math.round(this.imageCount / 5) == 0) {
+        this.finalPrediction(
+          this.DATASET[Math.round(Math.random() * this.imageCount)],
+          outputToHtml
+        );
+      }
+
+      if (index % 10 == 9) {
+        console.log(`${index + 1}/${this.imageCount}`);
+      }
     }
   };
 
-  buildOutputMap = (dimArray, colourNo) => {
+  forwardPass = (dimArray) => {
     /*
     the input is 32 x 32
     we need to apply a filter over the top
@@ -150,13 +171,7 @@ class Part5 {
           paddedArray[y + 2].slice(x, x + 3),
         ];
 
-        // Multiply the weights against the filter we've applied
-        const output = math.dotMultiply(
-          filter,
-          this.WEIGHTS[this.colours[colourNo]]
-        );
-
-        const outputSum = output
+        const outputSum = filter
           .reduce(function (a, b) {
             return a.concat(b);
           })
@@ -206,7 +221,7 @@ class Part5 {
     this.DATASET = this.DATASET.map((buffer) => {
       // 1 byte label, then 3072 R/G/B bytes
       let dict = {
-        label: this.decEnc(buffer.slice(0, 1)) / 10, // so our target is between 0 and 1
+        label: parseInt(this.decEnc(buffer.slice(0, 1))),
         redRaw: buffer.slice(1, 1025),
         red: [],
         greenRaw: buffer.slice(1025, 2049),
@@ -231,21 +246,50 @@ class Part5 {
   };
 
   train = (currentImage) => {
-    for (let epoch = 0; epoch < this.EPOCHS; epoch++) {
-      const target = currentImage["label"];
-      for (const colour of Object.entries(currentImage["processedChannels"])) {
-        const inputs = colour[1];
+    const predictions = this.generatePredictions(currentImage);
 
-        // good god how do i do this ???
-        // for now just show a pretty picture
+    const loss = this.calculateLoss(currentImage, predictions);
+    this.updateWeights(loss, currentImage);
+  };
 
-        // our dict has a label (0 -> 0.9)
-        // our dict has 'processedChannels' which is what we're looping through
-        // colour[1] is an 8x8 matrix of that specific colour channel (RGB)
-        // ... hmmm
+  generatePredictions = (currentImage) => {
+    let predictions = [];
+    for (let l = 0; l < this.labels.length; l++) {
+      predictions = predictions.concat(
+        math.dot(currentImage["combinedVector"], this.WEIGHTS[l]) +
+          this.BIASES[l]
+      );
+    }
+    return predictions;
+  };
+
+  calculateLoss = (img, predictions) => {
+    let total = 0;
+    for (let l = 0; l < this.labels.length; l++) {
+      if (l != img["label"]) {
+        total += math.max(0, predictions[l] - predictions[img["label"]] + 1);
       }
     }
-    this.displayImg(currentImage);
+    return total;
+  };
+
+  updateWeights = (loss, currentImage) => {
+    const label = currentImage["label"];
+
+    // Calculate gradients
+    const gradients = this.WEIGHTS[label].map(
+      (w) =>
+        w * loss * this.relu_d(this.PREVIOUS ?? currentImage["finalVector"])
+    ); // is this relu_d correct, should I use the previous image vector? hmm
+
+    // Update weights and bias
+    this.WEIGHTS[label] = this.WEIGHTS[label].map(
+      (w, i) => w - this.LEARNING_RATE * gradients[i]
+    );
+    this.BIASES[label] =
+      this.BIASES[label] - this.LEARNING_RATE * gradients[label];
+
+    this.PREVIOUS = currentImage["finalVector"];
   };
 
   decEnc = (buffer) => {
@@ -266,8 +310,11 @@ class Part5 {
     return combinedArrayBuffer;
   };
 
-  displayImg = (dict) => {
+  displayImg = (dict, prediction = "") => {
     // Create a canvas and display an image from the combined RGBA ArrayBuffer
+    const id = Math.random().toString();
+    const span = document.createElement("span");
+    span.id = id;
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     canvas.width = 32;
@@ -280,7 +327,16 @@ class Part5 {
     );
 
     ctx.putImageData(imageData, 0, 0);
-    document.getElementById("outputDiv").appendChild(canvas);
+    document.getElementById("outputDiv").appendChild(span);
+
+    const el = document.getElementById(id);
+    el.appendChild(canvas);
+
+    if (prediction.length) {
+      const text = document.createElement("p");
+      text.innerText = prediction;
+      el.appendChild(text);
+    }
   };
 
   relu = (x) => Math.max(0, x);

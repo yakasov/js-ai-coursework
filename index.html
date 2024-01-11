@@ -16,6 +16,12 @@
       .center {
         text-align: center;
       }
+
+      #outputDiv {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+      }
     </style>
   </head>
 
@@ -37,12 +43,13 @@
         <button onclick="p5()">Part 5</button>
       </div>
     </div>
-    <div class="center" id="outputDiv">
+    <div class="center">
       <p id="outputEl">
         Click each button to run.<br />Pressing the same button again will
         reinitialize that part and yield a different result (except for Part 5).
       </p>
     </div>
+    <div class="center" id="outputDiv"></div>
   </body>
 
   <script src="./js/math.js"></script>
