@@ -33,13 +33,10 @@ class Part5 {
         .fill(0)
         .map(() => this.round(Math.random()));
     }
-    this.BIASES = {};
-    for (let l = 0; l < this.labels.length; l++) {
-      this.BIASES[l] = this.round(Math.random());
-    }
+    this.DERIVATIVES = {};
 
     this.LEARNING_RATE = 0.1;
-    this.PREVIOUS = [];
+    this.PREVIOUS_PREDICTION = [];
   }
 
   main = async (outputToHtml = false) => {
@@ -249,17 +246,21 @@ class Part5 {
     const predictions = this.generatePredictions(currentImage);
 
     const loss = this.calculateLoss(currentImage, predictions);
-    this.updateWeights(loss, currentImage);
+    this.backwardsPass(loss, currentImage);
+    this.gradientDescent();
+
+    this.PREVIOUS_PREDICTION = predictions;
   };
 
   generatePredictions = (currentImage) => {
     let predictions = [];
+
     for (let l = 0; l < this.labels.length; l++) {
       predictions = predictions.concat(
-        math.dot(currentImage["combinedVector"], this.WEIGHTS[l]) +
-          this.BIASES[l]
+        math.dot(currentImage["combinedVector"], this.WEIGHTS[l])
       );
     }
+
     return predictions;
   };
 
@@ -273,23 +274,33 @@ class Part5 {
     return total;
   };
 
-  updateWeights = (loss, currentImage) => {
-    const label = currentImage["label"];
+  backwardsPass = (loss, img) => {
+    for (let l = this.labels.length - 1; l >= 0; l--) {
+      // Our derivative for the previous output is our error
+      // multiplied by x * (1 / x) our previous output
+      const derivative =
+        loss *
+        this.relu_d(
+          this.PREVIOUS_PREDICTION.reduce((p, c) => p + c, 0) /
+            this.PREVIOUS_PREDICTION.length ?? 0
+        );
 
-    // Calculate gradients
-    const gradients = this.WEIGHTS[label].map(
-      (w) =>
-        w * loss * this.relu_d(this.PREVIOUS ?? currentImage["finalVector"])
-    ); // is this relu_d correct, should I use the previous image vector? hmm
+      const prediction = img["combinedVector"];
 
-    // Update weights and bias
-    this.WEIGHTS[label] = this.WEIGHTS[label].map(
-      (w, i) => w - this.LEARNING_RATE * gradients[i]
-    );
-    this.BIASES[label] =
-      this.BIASES[label] - this.LEARNING_RATE * gradients[label];
+      // Our current derivative is our current output multiplied
+      // by the previously calculated derivative
+      this.DERIVATIVES[l] = math.dotMultiply(prediction, derivative);
+    }
+  };
 
-    this.PREVIOUS = currentImage["finalVector"];
+  gradientDescent = () => {
+    for (let l = 0; l < this.labels.length; l++) {
+      const weightUpdate = math.dotMultiply(
+        this.DERIVATIVES[l],
+        this.LEARNING_RATE
+      );
+      this.WEIGHTS[l] = this.WEIGHTS[l].map((v, i) => v + weightUpdate[i]);
+    }
   };
 
   decEnc = (buffer) => {
