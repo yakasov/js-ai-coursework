@@ -10,7 +10,7 @@ class Part5 {
   constructor() {
     this.decoder = new TextDecoder("utf-8");
     this.encoder = new TextEncoder("utf-8");
-    this.imageCount = 10000; // How many images (out of 10000) to load
+    this.imageCount = 1000; // How many images (out of 10000) to load
     this.labels = [
       "airplane",
       "car",
@@ -51,6 +51,8 @@ class Part5 {
     }
 
     this.sampleImages(outputToHtml);
+    console.warn("weights", this.WEIGHTS);
+    console.warn("derivatives", this.DERIVATIVES);
   };
 
   finalPrediction = (img, outputToHtml) => {
@@ -80,7 +82,7 @@ class Part5 {
         .flat();
     }
 
-    const predictions = this.generatePredictions(img);
+    const predictions = this.generatePredictions(img, true);
     const prediction =
       this.labels[predictions.indexOf(Math.max(...predictions))];
     if (outputToHtml) {
@@ -243,16 +245,29 @@ class Part5 {
   };
 
   train = (currentImage) => {
+    const label = currentImage["label"];
     const predictions = this.generatePredictions(currentImage);
 
-    const loss = this.calculateLoss(currentImage, predictions);
-    this.backwardsPass(loss, currentImage);
-    this.gradientDescent();
+    const loss = this.calculateLoss(label, predictions);
+    // const lossDeltas = predictions.map((p) => loss * this.relu(p));
+    // for (let l = 0; l < this.labels.length; l++) {
+    //   this.WEIGHTS[l] = this.WEIGHTS[l].map(
+    //     (w) => w + lossDeltas[l] * this.LEARNING_RATE
+    //   );
+    // }
+
+    const lossDelta = this.relu_d(predictions[label]) * loss;
+    this.WEIGHTS[label] = this.WEIGHTS[label].map(
+      (w) => w + lossDelta * this.LEARNING_RATE
+    );
+
+    //this.backwardsPass(loss, currentImage);
+    //this.gradientDescent();
 
     this.PREVIOUS_PREDICTION = predictions;
   };
 
-  generatePredictions = (currentImage) => {
+  generatePredictions = (currentImage, debug = false) => {
     let predictions = [];
 
     for (let l = 0; l < this.labels.length; l++) {
@@ -261,17 +276,14 @@ class Part5 {
       );
     }
 
+    if (debug) {
+      console.log("predictions", predictions);
+    }
     return predictions;
   };
 
-  calculateLoss = (img, predictions) => {
-    let total = 0;
-    for (let l = 0; l < this.labels.length; l++) {
-      if (l != img["label"]) {
-        total += math.max(0, predictions[l] - predictions[img["label"]] + 1);
-      }
-    }
-    return total;
+  calculateLoss = (label, predictions) => {
+    return predictions[label] - Math.max(...predictions);
   };
 
   backwardsPass = (loss, img) => {
