@@ -17,10 +17,25 @@
         text-align: center;
       }
 
+      .inline {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+      }
+
       #outputDiv {
         display: flex;
         flex-direction: row;
         justify-content: space-around;
+      }
+
+      canvas {
+        width: 64px;
+        height: 64px;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -o-crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+        -ms-interpolation-mode: nearest-neighbor;
       }
     </style>
   </head>
@@ -41,6 +56,30 @@
       </div>
       <div class="column" id="part5col">
         <button onclick="p5()">Part 5</button>
+        <span class="inline">
+          <p>Images</p>
+          <input
+            type="range"
+            min="10"
+            max="10000"
+            value="5000"
+            class="slider"
+            id="imageCountSlider"
+          />
+          <p id="imageCountDisplay">5000</p>
+        </span>
+        <span class="inline">
+          <p>Filters</p>
+          <input
+            type="range"
+            min="1"
+            max="4"
+            value="2"
+            class="slider"
+            id="filterSlider"
+          />
+          <p id="filterDisplay">2</p>
+        </span>
       </div>
     </div>
     <div class="center">
@@ -59,31 +98,50 @@
   <script src="./js/part4.js"></script>
   <script src="./js/part5.js"></script>
   <script>
+    const imageCountSlider = document.getElementById("imageCountSlider");
+    const imageCountDisplay = document.getElementById("imageCountDisplay");
+    imageCountDisplay.innerText = imageCountSlider.value;
+    imageCountSlider.oninput = () => {
+      imageCountDisplay.innerText = imageCountSlider.value;
+    };
+
+    const filterSlider = document.getElementById("filterSlider");
+    const filterDisplay = document.getElementById("filterDisplay");
+    filterDisplay.innerText = filterSlider.value;
+    filterSlider.oninput = () => {
+      filterDisplay.innerText = filterSlider.value;
+    };
+
     const part5 = new Part5();
     // dataset is a lot to load so we don't reinit it
 
     function p1() {
+      document.getElementById("outputDiv").innerHTML = "";
       const p = new Part1();
       p.main(true);
     }
 
     function p2() {
+      document.getElementById("outputDiv").innerHTML = "";
       const p = new Part2();
       p.main(true);
     }
 
     function p3() {
+      document.getElementById("outputDiv").innerHTML = "";
       const p = new Part3();
       p.main(true);
     }
 
     function p4() {
+      document.getElementById("outputDiv").innerHTML = "";
       const p = new Part4();
       p.main(true);
     }
 
     function p5() {
-      part5.main(true);
+      document.getElementById("outputDiv").innerHTML = "";
+      part5.main(true, imageCountSlider.value, filterSlider.value);
     }
   </script>
 </html>
