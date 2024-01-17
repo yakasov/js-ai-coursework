@@ -217,6 +217,9 @@ class Part5 {
   };
 
   loadDataset = async () => {
+    console.warn(
+      "Loading dataset - this can take a few seconds if not already loaded!"
+    );
     await fetch("./dataset/data_batch_1.bin")
       .then((response) => {
         return response.arrayBuffer();
@@ -228,6 +231,7 @@ class Part5 {
           this.DATASET.push(slicedData);
         }
       });
+    console.warn("Dataset loaded - beginning processing...");
 
     this.DATASET = this.DATASET.map((buffer) => {
       // 1 byte label, then 3072 R/G/B bytes
