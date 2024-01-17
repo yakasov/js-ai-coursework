@@ -4,6 +4,9 @@ and running >
 await (new Part4()).main()
 It can also be found at
 https://yakasov.github.io/js-ai-coursework/
+
+Part 4 is adapted from Part 3 but with two hidden layers in the middle
+both with three nodes and a different activation function
 */
 
 class Part4 {
@@ -14,7 +17,7 @@ class Part4 {
     this.LAYERS = [this.INPUT_SIZE]
       .concat(this.HIDDEN_SIZE)
       .concat(this.OUTPUT_SIZE);
-    this.TRAIN_SIZE = 100; // Training set size
+    this.TRAIN_SIZE = 1000; // Training set size
 
     this.LEARNING_RATE = 0.1;
     this.EPOCHS = 250; // Keep TRAIN_SIZE * EPOCHS = ~ 1e5

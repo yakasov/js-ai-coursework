@@ -10,7 +10,7 @@ class Part5 {
   constructor() {
     this.decoder = new TextDecoder("utf-8");
     this.encoder = new TextEncoder("utf-8");
-    this.imageCount = 10000; // How many images (out of 10000) to load
+    this.imageCount = 1000; // How many images (out of 10000) to load
     this.labels = [
       "airplane",
       "car",
@@ -53,7 +53,15 @@ class Part5 {
       await this.loadDataset();
     }
 
-    this.sampleImages(outputToHtml);
+    this.sampleImages();
+
+    for (const [_, finalImg] of this.DATASET.slice(
+      this.imageCount - 5,
+      this.imageCount
+    ).entries()) {
+      console.log(finalImg);
+      this.finalPrediction(finalImg, outputToHtml);
+    }
   };
 
   finalPrediction = (img, outputToHtml) => {
@@ -91,7 +99,7 @@ class Part5 {
     }
   };
 
-  sampleImages = (outputToHtml) => {
+  sampleImages = () => {
     for (const [index, img] of this.DATASET.entries()) {
       // Each image ...
       let outputs = {
@@ -123,13 +131,6 @@ class Part5 {
       }
 
       this.train(img);
-
-      if (index % math.round(this.imageCount / 5) == 0) {
-        this.finalPrediction(
-          this.DATASET[Math.round(Math.random() * this.imageCount)],
-          outputToHtml
-        );
-      }
 
       if (index % 10 == 9) {
         console.log(`${index + 1}/${this.imageCount}`);
