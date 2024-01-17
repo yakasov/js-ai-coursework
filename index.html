@@ -17,6 +17,12 @@
         text-align: center;
       }
 
+      .inline {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+      }
+
       #outputDiv {
         display: flex;
         flex-direction: row;
@@ -50,6 +56,30 @@
       </div>
       <div class="column" id="part5col">
         <button onclick="p5()">Part 5</button>
+        <span class="inline">
+          <p>Images</p>
+          <input
+            type="range"
+            min="10"
+            max="10000"
+            value="5000"
+            class="slider"
+            id="imageCountSlider"
+          />
+          <p id="imageCountDisplay">5000</p>
+        </span>
+        <span class="inline">
+          <p>Filters</p>
+          <input
+            type="range"
+            min="1"
+            max="4"
+            value="2"
+            class="slider"
+            id="filterSlider"
+          />
+          <p id="filterDisplay">2</p>
+        </span>
       </div>
     </div>
     <div class="center">
@@ -68,6 +98,20 @@
   <script src="./js/part4.js"></script>
   <script src="./js/part5.js"></script>
   <script>
+    const imageCountSlider = document.getElementById("imageCountSlider");
+    const imageCountDisplay = document.getElementById("imageCountDisplay");
+    imageCountDisplay.innerText = imageCountSlider.value;
+    imageCountSlider.oninput = () => {
+      imageCountDisplay.innerText = imageCountSlider.value;
+    };
+
+    const filterSlider = document.getElementById("filterSlider");
+    const filterDisplay = document.getElementById("filterDisplay");
+    filterDisplay.innerText = filterSlider.value;
+    filterSlider.oninput = () => {
+      filterDisplay.innerText = filterSlider.value;
+    };
+
     const part5 = new Part5();
     // dataset is a lot to load so we don't reinit it
 
@@ -97,7 +141,7 @@
 
     function p5() {
       document.getElementById("outputDiv").innerHTML = "";
-      part5.main(true);
+      part5.main(true, imageCountSlider.value, filterSlider.value);
     }
   </script>
 </html>

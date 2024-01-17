@@ -10,7 +10,6 @@ class Part5 {
   constructor() {
     this.decoder = new TextDecoder("utf-8");
     this.encoder = new TextEncoder("utf-8");
-    this.imageCount = 10000; // How many images (out of 10000) to load
     this.labels = [
       "airplane",
       "car",
@@ -27,21 +26,29 @@ class Part5 {
 
     this.DATASET = [];
     this.FILTERS = 2;
+    this.IMAGECOUNT = 10000; // How many images (out of 10000) to load
     this.WEIGHTS = {};
-    for (let l = 0; l < this.labels.length; l++) {
-      this.WEIGHTS[l] = new Array(3072 / 4 ** this.FILTERS)
-        .fill(0)
-        .map(() => this.round(Math.random()));
-    }
     this.DERIVATIVES = {};
 
     this.LEARNING_RATE = 0.1;
   }
 
-  main = async (outputToHtml = false) => {
+  main = async (
+    outputToHtml = false,
+    customImageCount = 0,
+    customFilterCount = 0
+  ) => {
+    if (customImageCount) this.IMAGECOUNT = customImageCount;
+    if (customFilterCount) this.FILTERS = customFilterCount;
+    for (let l = 0; l < this.labels.length; l++) {
+      this.WEIGHTS[l] = new Array(3072 / 4 ** this.FILTERS)
+        .fill(0)
+        .map(() => this.round(Math.random()));
+    }
+
     if (outputToHtml) {
       const el = document.getElementById("outputEl");
-      el.innerHTML = `Building output maps...<br>Processing ${this.imageCount} images over ${this.FILTERS} filters<br><br>You can see progress in the console!`;
+      el.innerHTML = `Building output maps...<br>Processing ${this.IMAGECOUNT} images over ${this.FILTERS} filters<br><br>You can see progress in the console!`;
       document.getElementById("outputDiv").innerHTML = "";
     }
 
@@ -52,15 +59,15 @@ class Part5 {
     this.processImages();
 
     for (const [_, finalImg] of this.DATASET.slice(
-      this.imageCount - 5,
-      this.imageCount
+      this.IMAGECOUNT - 5,
+      this.IMAGECOUNT
     ).entries()) {
       this.finalPrediction(finalImg, outputToHtml);
     }
 
     if (outputToHtml) {
       const el = document.getElementById("outputEl");
-      el.innerHTML = `Generated 5 predictions from ${this.imageCount} images over ${this.FILTERS} filters!`;
+      el.innerHTML = `Generated 5 predictions from ${this.IMAGECOUNT} images over ${this.FILTERS} filters!`;
     }
   };
 
@@ -142,8 +149,8 @@ class Part5 {
 
       this.train(img);
 
-      if (index % (this.imageCount / 100) == 0) {
-        console.log(`${Math.round((index / this.imageCount) * 100) + 1}%`);
+      if (index % Math.round(this.IMAGECOUNT / 100) == 0) {
+        console.log(`${Math.round((index / this.IMAGECOUNT) * 100) + 1}%`);
       }
     }
   };
@@ -215,7 +222,7 @@ class Part5 {
         return response.arrayBuffer();
       })
       .then((buffer) => {
-        for (let i = 0; i < this.imageCount; i++) {
+        for (let i = 0; i < this.IMAGECOUNT; i++) {
           // Divide the buffer into 3073 byte parts (label + channels)
           let slicedData = buffer.slice(3073 * i, 3073 * (i + 1));
           this.DATASET.push(slicedData);
