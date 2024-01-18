@@ -81,9 +81,6 @@ class Part5 {
       const button = document.getElementById("p5button");
       button.disabled = true;
     }
-
-    console.log("weights", this.WEIGHTS);
-    console.log("dataset", this.DATASET[this.IMAGECOUNT - 1]);
   };
 
   finalPrediction = (img, outputToHtml) => {
@@ -155,18 +152,24 @@ class Part5 {
         this.DATASET[index]["processedChannels"] = outputs;
         this.DATASET[index]["combinedVector"] = []
           .concat(
-            ...this.DATASET[index]["processedChannels"]["red"],
-            ...this.DATASET[index]["processedChannels"]["green"],
-            this.DATASET[index]["processedChannels"]["blue"]
+            ...this.DATASET[index]["processedChannels"]["red"].map((a) =>
+              this.normalise(a)
+            ),
+            ...this.DATASET[index]["processedChannels"]["green"].map((a) =>
+              this.normalise(a)
+            ),
+            this.DATASET[index]["processedChannels"]["blue"].map((a) =>
+              this.normalise(a)
+            )
           )
           .flat();
       }
 
       this.train(img);
-    }
 
-    if (index % Math.round(this.IMAGECOUNT / 100) == 0) {
-      console.log(`${Math.round((index / this.IMAGECOUNT) * 100) + 1}%`);
+      if (index % Math.round(this.IMAGECOUNT / 100) == 0) {
+        console.log(`${Math.round((index / this.IMAGECOUNT) * 100) + 1}%`);
+      }
     }
   };
 
@@ -277,6 +280,17 @@ class Part5 {
     });
   };
 
+  normalise = (data) => {
+    // Numbers are too big so normalise them
+    let mean = data.reduce((a, b) => a + b) / data.length;
+    let deviation = Math.sqrt(
+      data.map((val) => Math.pow(val - mean, 2)).reduce((a, b) => a + b) /
+        data.length
+    );
+
+    return data.map((val) => (val - mean) / deviation);
+  };
+
   train = (currentImage) => {
     /*
     Originally this was implemented with backpropagation and gradient descent
@@ -290,12 +304,24 @@ class Part5 {
     const label = currentImage["label"];
     const predictions = this.generatePredictions(currentImage);
 
-    const loss = this.calculateLoss(label, predictions);
+    const probabilities = this.softmax(predictions);
+
+    let onehotLabel = new Array(this.labels.length).fill(0);
+    onehotLabel[label] = 1;
+    const loss = this.crossEntropyLoss(probabilities, onehotLabel);
 
     const lossDelta = this.leaky_relu_d(predictions[label]) * loss;
     this.WEIGHTS[label] = this.WEIGHTS[label].map(
       (w) => w - lossDelta * this.LEARNING_RATE
     );
+
+    if (false) {
+      console.log("predictions", predictions);
+      console.log("probabilities", probabilities);
+      console.log("loss", loss);
+      console.log("lossDelta", lossDelta);
+      console.log("weights", this.WEIGHTS);
+    }
   };
 
   generatePredictions = (currentImage) => {
@@ -316,14 +342,20 @@ class Part5 {
     return predictions;
   };
 
-  calculateLoss = (label, predictions) => {
-    // This is just an implementation of Multiclass SVM Loss
-    // actual target - each prediction + 1
-    let totalLoss = 0;
-    for (let l = 0; l < this.labels.length; l++) {
-      totalLoss += Math.max(0, predictions[l] - predictions[label] + 1);
-    }
-    return totalLoss;
+  softmax = (predictions) => {
+    // Calculate e^p for each prediction
+    let max = Math.max(...predictions);
+    let exps = predictions.map((p) => Math.exp(p - max));
+    let sum = exps.reduce((a, b) => a + b);
+
+    // Divide each p_i in P by the total sum to get the predicted probabilities
+    return exps.map((p) => p / sum);
+  };
+
+  crossEntropyLoss = (predictions, onehotLabel) => {
+    // -sum(true * log(predicted))
+    let loss = onehotLabel.map((y, i) => -y * Math.log(predictions[i]));
+    return loss.reduce((a, b) => a + b);
   };
 
   decEnc = (buffer) => {
