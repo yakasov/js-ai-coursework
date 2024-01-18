@@ -155,19 +155,36 @@ class Part5 {
         this.DATASET[index]["processedChannels"] = outputs;
         this.DATASET[index]["combinedVector"] = []
           .concat(
-            ...this.DATASET[index]["processedChannels"]["red"],
-            ...this.DATASET[index]["processedChannels"]["green"],
-            this.DATASET[index]["processedChannels"]["blue"]
+            ...this.DATASET[index]["processedChannels"]["red"].map((a) =>
+              this.normalise(a)
+            ),
+            ...this.DATASET[index]["processedChannels"]["green"].map((a) =>
+              this.normalise(a)
+            ),
+            this.DATASET[index]["processedChannels"]["blue"].map((a) =>
+              this.normalise(a)
+            )
           )
           .flat();
       }
 
       this.train(img);
-    }
 
-    if (index % Math.round(this.IMAGECOUNT / 100) == 0) {
-      console.log(`${Math.round((index / this.IMAGECOUNT) * 100) + 1}%`);
+      if (index % Math.round(this.IMAGECOUNT / 100) == 0) {
+        console.log(`${Math.round((index / this.IMAGECOUNT) * 100) + 1}%`);
+      }
     }
+  };
+
+  normalise = (data) => {
+    // Numbers are too big so normalise them
+    let mean = data.reduce((a, b) => a + b) / data.length;
+    let deviation = Math.sqrt(
+      data.map((val) => Math.pow(val - mean, 2)).reduce((a, b) => a + b) /
+        data.length
+    );
+
+    return data.map((val) => (val - mean) / deviation);
   };
 
   forwardPass = (dimArray) => {
@@ -293,8 +310,8 @@ class Part5 {
     const loss = this.calculateLoss(label, predictions);
 
     const lossDelta = this.leaky_relu_d(predictions[label]) * loss;
-    this.WEIGHTS[label] = this.WEIGHTS[label].map(
-      (w) => w - lossDelta * this.LEARNING_RATE
+    this.WEIGHTS[label] = this.normalise(
+      this.WEIGHTS[label].map((w) => w - lossDelta * this.LEARNING_RATE)
     );
   };
 
@@ -388,7 +405,7 @@ class Part5 {
 
   relu = (x) => Math.max(0, x);
 
-  leaky_relu_d = (x) => (x >= 0 ? 1 : 0.01);
+  leaky_relu_d = (x) => (x >= 0 ? 1 : 0); // leaky no worky !
 
   round = (x) => Math.round(x * 100) / 100;
 }
