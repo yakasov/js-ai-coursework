@@ -28,7 +28,6 @@ class Part5 {
     this.FILTERS = 2;
     this.IMAGECOUNT = 10000; // How many images (out of 10000) to load
     this.WEIGHTS = {};
-    this.DERIVATIVES = {};
 
     this.LEARNING_RATE = 0.1;
   }
@@ -46,9 +45,19 @@ class Part5 {
         .map(() => this.round(Math.random()));
     }
 
+    const eta = `Estimated time: ${
+      Math.round(
+        (this.IMAGECOUNT *
+          ((this.FILTERS ** 2 + 747 * this.FILTERS - 418) /
+            (100 * this.FILTERS ** 2))) /
+          10
+      ) / 100
+    } seconds`;
+
+    console.warn(eta);
     if (outputToHtml) {
       const el = document.getElementById("outputEl");
-      el.innerHTML = `Building output maps...<br>Processing ${this.IMAGECOUNT} images over ${this.FILTERS} filters<br><br>You can see progress in the console!`;
+      el.innerHTML = `Building output maps...<br>Processing ${this.IMAGECOUNT} images over ${this.FILTERS} filters<br><br>You can see progress in the console!<br>${eta}`;
       document.getElementById("outputDiv").innerHTML = "";
     }
 
@@ -67,8 +76,14 @@ class Part5 {
 
     if (outputToHtml) {
       const el = document.getElementById("outputEl");
-      el.innerHTML = `Generated 5 predictions from ${this.IMAGECOUNT} images over ${this.FILTERS} filters!`;
+      el.innerHTML = `Generated 5 predictions from ${this.IMAGECOUNT} images over ${this.FILTERS} filters!<br>(please refresh to generate again)`;
+
+      const button = document.getElementById("p5button");
+      button.disabled = true;
     }
+
+    console.log("weights", this.WEIGHTS);
+    console.log("dataset", this.DATASET[this.IMAGECOUNT - 1]);
   };
 
   finalPrediction = (img, outputToHtml) => {
@@ -148,10 +163,10 @@ class Part5 {
       }
 
       this.train(img);
+    }
 
-      if (index % Math.round(this.IMAGECOUNT / 100) == 0) {
-        console.log(`${Math.round((index / this.IMAGECOUNT) * 100) + 1}%`);
-      }
+    if (index % Math.round(this.IMAGECOUNT / 100) == 0) {
+      console.log(`${Math.round((index / this.IMAGECOUNT) * 100) + 1}%`);
     }
   };
 
@@ -277,9 +292,9 @@ class Part5 {
 
     const loss = this.calculateLoss(label, predictions);
 
-    const lossDelta = this.relu_d(predictions[label]) * loss;
+    const lossDelta = this.leaky_relu_d(predictions[label]) * loss;
     this.WEIGHTS[label] = this.WEIGHTS[label].map(
-      (w) => w + lossDelta * this.LEARNING_RATE
+      (w) => w - lossDelta * this.LEARNING_RATE
     );
   };
 
@@ -294,7 +309,7 @@ class Part5 {
     */
     for (let l = 0; l < this.labels.length; l++) {
       predictions = predictions.concat(
-        math.dot(currentImage["combinedVector"], this.WEIGHTS[l]) % 10
+        math.dot(currentImage["combinedVector"], this.WEIGHTS[l])
       );
     }
 
@@ -373,7 +388,7 @@ class Part5 {
 
   relu = (x) => Math.max(0, x);
 
-  relu_d = (x) => (x >= 0 ? 1 : 0);
+  leaky_relu_d = (x) => (x >= 0 ? 1 : 0.01);
 
   round = (x) => Math.round(x * 100) / 100;
 }
